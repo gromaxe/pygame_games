@@ -12,7 +12,11 @@ FPS = 60
 bg = pygame.image.load("birds/back.png")
 ground = pygame.image.load("birds/ground.png")
 bg = pygame.transform.scale(bg, (screen_width, screen_height))
-ground = pygame.transform.scale(ground, (int(screen_width*1.2), screen_height//5))
+ground = pygame.transform.scale(ground, (int(screen_width * 1.2), screen_height // 5))
+
+flap_sound = pygame.mixer.Sound("birds/flap.wav")
+score_sound = pygame.mixer.Sound("birds/score.wav")
+game_over_sound = pygame.mixer.Sound("birds/gameover.wav")
 
 
 class Bird(pygame.sprite.Sprite):
@@ -42,13 +46,14 @@ class Bird(pygame.sprite.Sprite):
 
     def jump(self):
         self.velocity = -10
+        flap_sound.play()
 
 
 class PipePair(pygame.sprite.Sprite):
     def __init__(self, x):
         super().__init__()
         self.image = pygame.image.load(f"birds/pipe.png")
-        self.image = pygame.transform.scale(self.image, (50,800))
+        self.image = pygame.transform.scale(self.image, (50, 800))
         self.top_pipe = pygame.transform.flip(self.image, False, True)
         self.bottom_pipe = self.image.copy()
         self.gap_size = 200
@@ -57,13 +62,13 @@ class PipePair(pygame.sprite.Sprite):
         self.top_rect = self.top_pipe.get_rect(midbottom=(x, self.top_height))
         self.bottom_rect = self.bottom_pipe.get_rect(midtop=(x, self.top_height + self.gap_size))
         self.velocity = 5
+        self.passed = False
 
     def update(self):
         self.top_rect.x -= int(self.velocity)
         self.bottom_rect.x -= int(self.velocity)
         if self.top_rect.right < 0:
             self.kill()
-
 
 bird_group = pygame.sprite.Group()
 pipe_group = pygame.sprite.Group()
@@ -74,6 +79,8 @@ bird_group.add(bird)
 ground_scroll = 0
 scroll_speed = 4
 game_over = False
+score = 0
+start_time = pygame.time.get_ticks()
 
 pipe_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(pipe_timer, 2000)
@@ -81,6 +88,7 @@ pygame.time.set_timer(pipe_timer, 2000)
 running = True
 while running:
     screen.blit(bg, (0, 0))
+    game_time = (pygame.time.get_ticks() - start_time) // 1000
 
     if not game_over:
         ground_scroll -= scroll_speed
@@ -101,25 +109,27 @@ while running:
         bird_group.update()
         pipe_group.update()
 
-        # проверяем на столкновения
         for pipe_pair in pipe_group:
-            if pipe_pair.top_rect.colliderect(bird.rect) or pipe_pair.bottom_rect.colliderect(bird.rect):
-                print("game_over = True")
-                bird.image = pygame.transform.flip(bird.image, False, True)
+            if bird.rect.colliderect(pipe_pair.top_rect) or bird.rect.colliderect(pipe_pair.bottom_rect):
+                game_over = True
+                game_over_sound.play()
+                print("Game over!")
+            if bird.rect.left > pipe_pair.top_rect.right and not pipe_pair.passed:
+                pipe_pair.passed = True
+                score += 1
+                score_sound.play()
 
-    # отрисовка
-    if random.random() > 0.8:
-        bird_group.draw(screen)
-        for pipe_pair in pipe_group:
-            screen.blit(pipe_pair.top_pipe, pipe_pair.top_rect)
-            screen.blit(pipe_pair.bottom_pipe, pipe_pair.bottom_rect)
-    else:
-        for pipe_pair in pipe_group:
-            screen.blit(pipe_pair.top_pipe, pipe_pair.top_rect)
-            screen.blit(pipe_pair.bottom_pipe, pipe_pair.bottom_rect)
-        bird_group.draw(screen)
+    bird_group.draw(screen)
+    for pipe_pair in pipe_group:
+        screen.blit(pipe_pair.top_pipe, pipe_pair.top_rect)
+        screen.blit(pipe_pair.bottom_pipe, pipe_pair.bottom_rect)
 
     screen.blit(ground, (ground_scroll, screen_height - ground.get_height()))
+    font = pygame.font.Font(None, 36)
+    score_surface = font.render(f'Score: {score}', True, pygame.Color('white'))
+    time_surface = font.render(f'Time: {game_time}s', True, pygame.Color('white'))
+    screen.blit(score_surface, (10, 10))
+    screen.blit(time_surface, (10, 50))
 
     pygame.display.flip()
     clock.tick(FPS)
