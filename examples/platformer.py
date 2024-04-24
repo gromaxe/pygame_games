@@ -16,6 +16,7 @@ WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 clock = pygame.time.Clock()
 
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -44,6 +45,7 @@ class Player(pygame.sprite.Sprite):
     def jump(self):
         self.vel_y = JUMP_HEIGHT
 
+
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height):
         super().__init__()
@@ -51,15 +53,23 @@ class Platform(pygame.sprite.Sprite):
         self.surf.fill(WHITE)
         self.rect = self.surf.get_rect(center=(x, y))
 
+    def update(self):
+        self.rect.move_ip(0, 1)
+        if self.rect.top > SCREEN_HEIGHT:
+            self.rect.bottom = 0
+
+
 all_sprites = pygame.sprite.Group()
 platforms = pygame.sprite.Group()
 
 player = Player()
-platform = Platform(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 20)
+platform_positions = [(i*1.2, i) for i in range(100, SCREEN_HEIGHT, 80)]
+for pos in platform_positions:
+    platform = Platform(pos[0], pos[1], SCREEN_WIDTH // 3, 20)
+    all_sprites.add(platform)
+    platforms.add(platform)
 
 all_sprites.add(player)
-all_sprites.add(platform)
-platforms.add(platform)
 
 running = True
 while running:
@@ -69,6 +79,9 @@ while running:
 
     pressed_keys = pygame.key.get_pressed()
     player.update(pressed_keys)
+
+    for platform in platforms:
+        platform.update()
 
     collisions = pygame.sprite.spritecollide(player, platforms, False)
     if collisions:
