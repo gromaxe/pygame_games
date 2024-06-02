@@ -1,5 +1,4 @@
 import math
-
 import pygame
 pygame.init()
 
@@ -16,6 +15,25 @@ ENEMY_SPAWN = pygame.USEREVENT + 1
 pygame.time.set_timer(ENEMY_SPAWN, 3000)  # начинаем с интервала в 3 секунды
 
 SHOOT_COOLDOWN = 500
+
+MENU = 0
+PLAYING = 1
+playing = MENU
+
+# Load images
+menu_bg = pygame.image.load("menu_bg.png")
+menu_bg = pygame.transform.scale(menu_bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+
+class Button(pygame.sprite.Sprite):
+    def __init__(self, x, y, image, *groups):
+        super().__init__(*groups)
+        self.image = pygame.image.load(image)
+        self.image = pygame.transform.scale(self.image, (200, 80))
+        self.rect = self.image.get_rect(topleft=(x, y))
+
+    def is_pressed(self, mouse_pos):
+        return self.rect.collidepoint(mouse_pos)
 
 
 class Castle:
@@ -44,7 +62,6 @@ class Castle:
             x_dist = 1.0*mouse_pos[0] - self.rect.left
             y_dist = 1.0*(mouse_pos[1] - self.rect.top)
             self.angle = math.degrees(math.atan2(y_dist, x_dist))
-            # print(self.angle)
             pygame.draw.line(screen, (1,1,1), (self.rect.left, self.rect.top), (mouse_pos))
             if pygame.mouse.get_pressed()[0] == 1:
                 new_arrow = Arrow(self.rect.left, self.rect.top, self.angle)
@@ -94,6 +111,7 @@ class Enemy(pygame.sprite.Sprite):
             castle.health -= self.health
             self.kill()
 
+
 enemies_group = pygame.sprite.Group()
 
 bg = pygame.image.load("birds/back.png")
@@ -102,32 +120,43 @@ bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
 castle = Castle(700, 350)
 enemy_count = 0
 
+buttons_group = pygame.sprite.Group()
+play_button = Button(300, 200, "play_button.png", buttons_group)
+exit_button = Button(300, 300, "exit_button.png", buttons_group)
+
 running = True
 while running:
+    mouse_pos = pygame.mouse.get_pos()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == ENEMY_SPAWN:
-            new_enemy = Enemy(0, 350)
-            enemies_group.add(new_enemy)
-            enemy_count += 1
-            if enemy_count == 15:
-                pygame.time.set_timer(ENEMY_SPAWN, 2000)  # Переключение на более частый интервал
+        if playing == MENU:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if play_button.is_pressed(mouse_pos):
+                    playing = PLAYING
+                elif exit_button.is_pressed(mouse_pos):
+                    running = False
+        elif playing == PLAYING:
+            if event.type == ENEMY_SPAWN:
+                new_enemy = Enemy(0, 350)
+                enemies_group.add(new_enemy)
+                enemy_count += 1
+                if enemy_count == 15:
+                    pygame.time.set_timer(ENEMY_SPAWN, 2000)  # Переключение на более частый интервал
 
-
-
-
-    screen.blit(bg, (0,0))
-    castle.draw()
-    castle.shoot()
-    # castle.spawn()
-    arrows_group.update()
-    arrows_group.draw(screen)
-
-    enemies_group.update()
-    enemies_group.draw(screen)
+    if playing == MENU:
+        screen.blit(menu_bg, (0, 0))
+        buttons_group.draw(screen)
+    elif playing == PLAYING:
+        screen.blit(bg, (0, 0))
+        castle.draw()
+        castle.shoot()
+        arrows_group.update()
+        arrows_group.draw(screen)
+        enemies_group.update()
+        enemies_group.draw(screen)
 
     pygame.display.flip()
     clock.tick(FPS)
 
-pygame.quit
+pygame.quit()
