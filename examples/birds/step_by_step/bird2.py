@@ -38,6 +38,12 @@ class Bird(pygame.sprite.Sprite):
 birds = pygame.sprite.Group()
 birds.add(Bird())
 
+
+class Pipe(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+
+
 ground_left = 0
 ground_speed = 5
 bird = Bird()
