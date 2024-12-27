@@ -42,6 +42,8 @@ birds.add(Bird())
 class Pipe(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
+        self.image = pygame.image.load("../pipe.png")
+        self.rect = self.image.get_rect()  # это контур трубы
 
 
 ground_left = 0
