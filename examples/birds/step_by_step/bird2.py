@@ -43,7 +43,7 @@ class Pipe(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = pygame.image.load("../pipe.png")
-        self.rect = self.image.get_rect()  # это контур трубы
+        self.rect = self.image.get_rect(topleft=(SCREEN_WIDTH, SCREEN_HEIGHT//2))  # это контур трубы
 
 
 pipes = pygame.sprite.Group()
