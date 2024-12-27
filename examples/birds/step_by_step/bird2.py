@@ -46,6 +46,9 @@ class Pipe(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()  # это контур трубы
 
 
+pipes = pygame.sprite.Group()
+pipes.add(Pipe())
+
 ground_left = 0
 ground_speed = 5
 bird = Bird()
@@ -65,6 +68,9 @@ while True:
 
     birds.update()
     birds.draw(screen)
+
+    pipes.update()
+    pipes.draw(screen)
 
     pygame.display.flip()
     clock.tick(FPS)
