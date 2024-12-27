@@ -45,6 +45,12 @@ class Pipe(pygame.sprite.Sprite):
         self.image = pygame.image.load("../pipe.png")
         self.rect = self.image.get_rect(topleft=(SCREEN_WIDTH, SCREEN_HEIGHT//2))  # это контур трубы
 
+    def update(self):
+        if self.rect.right < 0:
+            self.rect.right=SCREEN_WIDTH
+        else:
+            self.rect.left -= ground_speed
+
 
 pipes = pygame.sprite.Group()
 pipes.add(Pipe())
