@@ -41,10 +41,12 @@ birds.add(bird)
 
 
 class Pipe(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, x=SCREEN_WIDTH, y=SCREEN_HEIGHT//2, flip=False):
         super().__init__()
         self.image = pygame.image.load("../pipe.png")
-        self.rect = self.image.get_rect(topleft=(SCREEN_WIDTH, SCREEN_HEIGHT//2))  # это контур трубы
+        if flip:
+            self.image = pygame.transform.flip(self.image, False, True)
+        self.rect = self.image.get_rect(topleft=(x,y))  # это контур трубы
 
     def update(self):
         if self.rect.right < 0:
@@ -54,7 +56,10 @@ class Pipe(pygame.sprite.Sprite):
 
 
 pipes = pygame.sprite.Group()
-pipes.add(Pipe())
+pipes.add(Pipe(x = 600, y = 400))
+pipes.add(Pipe(x = 600, y =-700, flip=True))
+pipes.add(Pipe(x = 200, y= 350))
+pipes.add(Pipe(x = 200, y=-750, flip=True))
 
 ground_left = 0
 ground_speed = 5
