@@ -35,8 +35,9 @@ class Bird(pygame.sprite.Sprite):
             self.speed = -15
 
 
+bird = Bird()
 birds = pygame.sprite.Group()
-birds.add(Bird())
+birds.add(bird)
 
 
 class Pipe(pygame.sprite.Sprite):
@@ -57,7 +58,6 @@ pipes.add(Pipe())
 
 ground_left = 0
 ground_speed = 5
-bird = Bird()
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
