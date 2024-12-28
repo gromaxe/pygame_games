@@ -84,7 +84,7 @@ while True:
     pipes.draw(screen)
 
     if pygame.sprite.spritecollideany(bird, pipes):
-        print(42)
+        sys.exit()
 
     pygame.display.flip()
     clock.tick(FPS)
